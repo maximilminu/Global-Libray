@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Publisher } from './entities/publisher.entity';
@@ -32,9 +32,23 @@ export class PublishersService {
     return this.publishersRepository.findOneBy({ id })
   }
 
-  async update(id: number, updatePublisherDto: CreatePublisherDto): Promise<Publisher> {
-    await this.publishersRepository.update(id, updatePublisherDto)
-    return this.findOne(id)
+  async update(publisherID: number, updatePublisherDto: CreatePublisherDto): Promise<Publisher> {
+
+    const publisher = await this.publishersRepository.findOneBy({id: publisherID})
+
+    if (!publisher) {
+      throw new HttpException(
+        {
+          error: 'PUBLISHER NOT FOUND',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    Object.assign(publisher, updatePublisherDto);
+
+    await this.publishersRepository.save(publisher)
+      return this.findOne(publisherID)
   }
 
   async remove(id: number): Promise<boolean>  {

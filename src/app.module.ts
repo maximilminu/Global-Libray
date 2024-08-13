@@ -21,7 +21,8 @@ import { Book } from './books/entities/book.entity';
       password: '1234',
       database: 'GlobalLibrary',
       entities: [Author, Publisher, Book],
-      synchronize: false
+      synchronize: false,
+      logging: ["query", "error"]
     }),
     AuthorsModule,
     PublishersModule,

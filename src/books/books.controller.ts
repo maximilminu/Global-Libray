@@ -10,10 +10,13 @@ import {
   HttpStatus,
   NotFoundException,
   HttpException,
+  Query,
+  Put,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { Book } from './entities/book.entity';
+import { query } from 'express';
 
 @Controller('/api/books')
 export class BooksController {
@@ -36,8 +39,18 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  async findAll(): Promise<Book[]> {
+    try {
+      return await this.booksService.findAll();
+    } catch (error) {
+      console.error('Error getting all books:', error.message || error);
+      throw new HttpException(
+        {
+          error: error.message || 'Error getting all book',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   @Get(':id')
@@ -46,7 +59,7 @@ export class BooksController {
       const bookData = await this.booksService.findOne(id);
       return bookData;
     } catch (error) {
-        console.error('Error getting book:', error.message || error);
+      console.error('Error getting book:', error.message || error);
       throw new HttpException(
         {
           error: error.message || 'Error getting book',
@@ -56,9 +69,19 @@ export class BooksController {
     }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: CreateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateBookDto: CreateBookDto) {
+    try {
+      return await this.booksService.update(+id, updateBookDto);
+    } catch (error) {
+      console.log('ERROR: ', error);
+      throw new HttpException(
+        {
+          error: error.message || 'Error updating the book',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   @Delete(':id')

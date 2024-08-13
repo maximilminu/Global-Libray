@@ -58,15 +58,30 @@ export class PublishersController {
     @Param('id') id: string,
     @Body() updatePublisherDto: CreatePublisherDto,
   ) {
-    return await this.publishersService.update(+id, updatePublisherDto);
+    try {
+      return await this.publishersService.update(+id, updatePublisherDto);
+    } catch (error) {
+      console.log('ERROR: ', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        {
+          error: 'Internal server error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: number): Promise<void> {
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: number) {
     const result = await this.publishersService.remove(id);
     if (!result) {
-      throw new NotFoundException(`Book with ID ${id} not found`);
+      throw new NotFoundException(`publisher with ID ${id} not found`);
+    } else {
+      return { message: `PUBLISHER WITH ID ${id} SUCCESSFULLY DELETED` };
     }
   }
 }

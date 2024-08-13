@@ -28,18 +28,33 @@ export class AuthorsController {
   }
 
   @Get()
-  findAll() {
-    return this.authorsService.findAll();
+  async findAll() {
+    return await this.authorsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.authorsService.findOne(id);
+  async findOne(@Param('id') id: number) {
+    return await this.authorsService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateAuthorDto: CreateAuthorDto) {
-    return this.authorsService.update(id, updateAuthorDto);
+  async update(
+    @Param('id') id: number,
+    @Body() updateAuthorDto: CreateAuthorDto,
+  ) {
+    try {
+      return await this.authorsService.update(id, updateAuthorDto);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        {
+          error: 'Internal server error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
